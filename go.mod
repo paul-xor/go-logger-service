@@ -8,6 +8,9 @@ require (
 	cloud.google.com/go/auth v0.5.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	github.com/go-chi/chi v1.5.5 // indirect
+	github.com/go-chi/chi/v5 v5.0.12 // indirect
+	github.com/go-chi/cors v1.2.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect

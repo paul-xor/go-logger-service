@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"log-service/cmd/data"
+	"net/http"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"google.golang.org/api/option"
 )
 
 const (
@@ -20,12 +22,12 @@ const (
 var client *mongo.Client
 
 type Config struct {
+	Models data.Models
 }
 
 func main() {
 	// connect to mongo
 	mongoClient, err := connectToMongo()
-
 	if err != nil {
 		log.Panic(err)
 	}
@@ -42,18 +44,46 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	// Add your application logic here
+	log.Println("Connected to MongoDB and application is running.")
+
+	app := Config{
+		Models: data.New(client),
+	}
+	// start webserver
+	go app.serve()
+}
+
+func (app *Config) serve() {
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
+	}
+
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Panic()
+	}
 }
 
 func connectToMongo() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI(mongoURL)
-	clientOptions.SetAuth(options.Credential{
+	clientOptions := options.Client().ApplyURI(mongoURL).SetAuth(options.Credential{
 		Username: "admin",
 		Password: "password",
 	})
-	//connect
+
+	// connect
 	c, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Println("Error conneting:", err)
+		log.Println("Error connecting:", err)
+		return nil, err
+	}
+
+	// Ping the database to verify connection
+	err = c.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Println("Error pinging database:", err)
 		return nil, err
 	}
 
